@@ -1,10 +1,10 @@
 import React, { useContext } from "react";
 import logo from "../../assets/ai.png";
-import { Button } from "@/components/ui/button";
+import { Button } from "../ui/button";
 import { SignInButton, useUser, UserButton } from "@clerk/clerk-react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Sparkles } from "lucide-react"; // clean diamond-style icon
-import { UserDetailContext } from "@/config/context/UserDetailContex";
+import { Sparkles } from "lucide-react";
+import { UserDetailContext } from "../../config/context/UserDetailContex";
 
 const Header = () => {
   const { isSignedIn } = useUser();

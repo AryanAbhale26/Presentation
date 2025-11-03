@@ -10,7 +10,7 @@ const Hero = () => {
   const navigate = useNavigate();
 
   return (
-    <section className="relative flex flex-col items-center justify-center text-center min-h-screen overflow-hidden text-white">
+    <section className="relative flex flex-col justify-between min-h-screen overflow-hidden text-white">
       {/* Background Video */}
       <video
         className="absolute inset-0 w-full h-full object-cover"
@@ -24,11 +24,10 @@ const Hero = () => {
         onCanPlay={(e) => e.currentTarget.play().catch(() => {})}
         onContextMenu={(e) => e.preventDefault()}
       />
-
-      <div className="absolute inset-0 bg-black/60"></div>
+      <div className="absolute inset-0 bg-black/60" />
 
       {/* Main Content */}
-      <div className="relative z-10 flex flex-col items-center justify-center mt-20 px-4 sm:px-6 md:px-8 space-y-6 max-w-5xl mx-auto">
+      <div className="relative z-10 flex flex-col items-center justify-center flex-grow text-center mt-20 px-4 sm:px-6 md:px-8 space-y-6 max-w-5xl mx-auto">
         <h2 className="font-extrabold text-3xl sm:text-4xl md:text-5xl leading-tight drop-shadow-lg">
           From Idea to Presentation in One Click ⚡
         </h2>
@@ -62,12 +61,12 @@ const Hero = () => {
         </div>
       </div>
 
-      {/* Footer */}
-      <footer className="relative z-10 w-full mt-25 bg-black/40 backdrop-blur-md border-t border-white/10 text-center">
-        <p className="text-gray-300 text-sm mt-10">
+      {/* Sticky Footer */}
+      <footer className="relative z-10 w-full bg-black/40 backdrop-blur-md border-t border-white/10 text-center py-6 mt-auto">
+        <p className="text-gray-300 text-sm">
           © {new Date().getFullYear()}{" "}
-          <span className="font-semibold text-white">AIPresentify</span>. All
-          rights reserved.
+          <span className="font-semibold text-white">Sparta</span>. All rights
+          reserved.
         </p>
 
         <div className="flex justify-center gap-6 mt-3 text-gray-400 text-sm">

@@ -1,7 +1,7 @@
-import Header from "@/components/custom/Header";
-import PromptBox from "@/components/custom/PromptBox";
-import { UserDetailContext } from "@/config/context/UserDetailContex";
-import { firebaseDb } from "@/config/FirebaseConfig";
+import Header from "../components/custom/Header";
+import PromptBox from "../components/custom/PromptBox";
+import { UserDetailContext } from "../config/context/UserDetailContex";
+import { firebaseDb } from "../config/FirebaseConfig";
 import { useUser, SignInButton } from "@clerk/clerk-react";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import React, { useContext, useEffect } from "react";
@@ -70,9 +70,8 @@ const Workspace = () => {
   return (
     <>
       <Header />
-      <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center">
+      <div className="min-h-screen bg-black text-white flex flex-col items-center ">
         {location.pathname === "/workspace" && <PromptBox />}
-
         <Outlet />
       </div>
     </>

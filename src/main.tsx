@@ -4,9 +4,9 @@ import "./index.css";
 import App from "./App.tsx";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import Workspace from "./workspace/Index.tsx";
-import Project from "./workspace/project/Index.tsx";
 import { ClerkProvider } from "@clerk/clerk-react";
 import { UserDetailContext } from "./config/context/UserDetailContex.tsx";
+import Outline from "./workspace/project/outline/index.tsx";
 
 const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 
@@ -19,7 +19,7 @@ const router = createBrowserRouter([
   {
     path: "/workspace",
     element: <Workspace />,
-    children: [{ path: "project/:projectId", element: <Project /> }],
+    children: [{ path: "project/:projectId/outline", element: <Outline /> }],
   },
 ]);
 

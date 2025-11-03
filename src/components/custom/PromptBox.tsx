@@ -1,10 +1,9 @@
 import React, { useState } from "react";
 import { Loader2Icon, Send } from "lucide-react";
-import Project from "@/workspace/project/Index";
 import MyProject from "./MyProject";
 import { v4 as uuidv4 } from "uuid";
 import { doc, setDoc } from "firebase/firestore";
-import { firebaseDb } from "@/config/FirebaseConfig";
+import { firebaseDb } from "../../config/FirebaseConfig";
 import { useUser } from "@clerk/clerk-react";
 import { Navigate, useNavigate } from "react-router-dom";
 
@@ -22,7 +21,9 @@ const PromptBox = () => {
     await setDoc(doc(firebaseDb, "project", projectId), {
       projectId: projectId,
       userInputPrompt: userInput,
+      noOfSlider: numSlides,
       createdBy: user?.primaryEmailAddress?.emailAddress,
+
       createdAt: Date.now(),
     });
     setLoading(false);
