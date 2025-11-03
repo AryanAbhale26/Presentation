@@ -1,4 +1,4 @@
-import { StrictMode } from "react";
+import { StrictMode, useState } from "react";
 import { createRoot } from "react-dom/client";
 import "./index.css";
 import App from "./App.tsx";
@@ -6,6 +6,7 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import Workspace from "./workspace/Index.tsx";
 import Project from "./workspace/project/Index.tsx";
 import { ClerkProvider } from "@clerk/clerk-react";
+import { UserDetailContext } from "./config/context/UserDetailContex.tsx";
 
 const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 
@@ -22,10 +23,19 @@ const router = createBrowserRouter([
   },
 ]);
 
+function Root() {
+  const [userDetails, setUserDetails] = useState();
+  return (
+    <ClerkProvider publishableKey={PUBLISHABLE_KEY}>
+      <UserDetailContext.Provider value={{ userDetails, setUserDetails }}>
+        <RouterProvider router={router} />
+      </UserDetailContext.Provider>
+    </ClerkProvider>
+  );
+}
+
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <ClerkProvider publishableKey={PUBLISHABLE_KEY}>
-      <RouterProvider router={router} />
-    </ClerkProvider>
+    <Root />
   </StrictMode>
 );
