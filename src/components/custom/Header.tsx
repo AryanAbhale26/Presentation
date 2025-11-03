@@ -1,56 +1,54 @@
 import React from "react";
+import logo from "../../assets/ai.png";
 import { Button } from "@/components/ui/button";
-import { Play } from "lucide-react";
-import "./Hero.css";
+import { SignInButton, useUser, UserButton } from "@clerk/clerk-react";
+import { useNavigate } from "react-router-dom";
 
-const GetStarted = () => {
+const Header = () => {
+  const { isSignedIn } = useUser();
+  const navigate = useNavigate();
+
   return (
-    <div className="relative min-h-screen flex flex-col items-center justify-between overflow-hidden bg-black text-white">
-      {/* 🌌 Animated Gradient Background */}
-      <div className="absolute inset-0 -z-10 animate-gradient bg-gradient-to-r from-violet-700 via-indigo-700 to-purple-800 opacity-30 bg-[length:400%_400%]" />
-
-      {/* 🦄 Hero Section */}
-      <section className="flex flex-col items-center justify-center text-center px-6 mt-32 space-y-6 max-w-4xl">
-        <h1 className="text-5xl md:text-6xl font-extrabold text-white drop-shadow-lg">
-          From Idea to Presentation in One Click ⚡
+    <header className="flex items-center justify-between w-full px-4 sm:px-8 py-3 sm:py-4 bg-gradient-to-b from-black to-[#0a0a0a] sticky top-0 z-50 border-b border-white/10">
+      <div className="flex items-center gap-3">
+        <img src={logo} alt="logo" className="h-10 w-10 sm:h-12 sm:w-12" />
+        <h1 className="text-lg sm:text-xl font-semibold text-white tracking-wide">
+          AIPresentify
         </h1>
-        <p className="text-xl text-gray-400 leading-relaxed max-w-2xl">
-          Generate sleek, editable PPT decks in minutes. AI handles slide
-          design, formatting, and visuals — so you can focus on your message,
-          impress your audience, and work smarter, not harder.
-        </p>
+      </div>
 
-        <div className="flex gap-4 mt-4">
-          <Button className="cursor-pointer bg-gradient-to-r from-purple-600 to-blue-600 text-white hover:opacity-90 font-semibold shadow-md flex items-center gap-2 transition-all duration-300">
-            <Play className="w-4 h-4 text-white" /> Watch Demo
-          </Button>
-          <Button className="cursor-pointer bg-white text-black font-semibold hover:bg-gray-200 shadow-md transition-all duration-300">
-            Get Started
-          </Button>
-        </div>
-      </section>
+      <div className="flex items-center gap-4">
+        {!isSignedIn ? (
+          <SignInButton mode="modal">
+            <Button className="text-sm sm:text-base px-4 sm:px-6 bg-white text-black hover:bg-gray-200 font-semibold shadow-md">
+              Sign In
+            </Button>
+          </SignInButton>
+        ) : (
+          <>
+            <Button
+              onClick={() => navigate("/workspace")}
+              className="text-sm sm:text-base px-4 sm:px-6 bg-white text-black hover:bg-gray-200 font-semibold shadow-md"
+            >
+              Go to Workspace
+            </Button>
 
-      {/* 🌙 Footer */}
-      <footer className="w-full py-6 mt-16 text-center text-gray-400 text-sm border-t border-gray-800">
-        <p>
-          © {new Date().getFullYear()}{" "}
-          <span className="font-semibold text-white">AIPresentify</span>. All
-          rights reserved.
-        </p>
-        <div className="flex justify-center gap-6 mt-2">
-          <a href="#" className="hover:text-white transition">
-            Privacy Policy
-          </a>
-          <a href="#" className="hover:text-white transition">
-            Terms of Service
-          </a>
-          <a href="#" className="hover:text-white transition">
-            Contact
-          </a>
-        </div>
-      </footer>
-    </div>
+            <div className="flex items-center justify-center">
+              <UserButton
+                afterSignOutUrl="/"
+                appearance={{
+                  elements: {
+                    avatarBox:
+                      "w-10 h-10 border border-white/20 rounded-full hover:ring-2 hover:ring-white/30 transition",
+                  },
+                }}
+              />
+            </div>
+          </>
+        )}
+      </div>
+    </header>
   );
 };
 
-export default GetStarted;
+export default Header;

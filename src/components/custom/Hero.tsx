@@ -1,42 +1,76 @@
 import React from "react";
-import { Button } from "@/components/ui/button";
+import { Button } from "../ui/button";
 import { Play } from "lucide-react";
-import "./Hero.css";
-const GetStarted = () => {
+import vid from "../../assets/bg.mp4";
+import { SignInButton, useUser } from "@clerk/clerk-react";
+import { useNavigate } from "react-router-dom";
+
+const Hero = () => {
+  const { user } = useUser();
+  const navigate = useNavigate();
+
   return (
-    <div className="relative min-h-screen flex flex-col items-center justify-between overflow-hidden">
-      {/* 🔮 Animated Gradient Background */}
-      <div className="absolute inset-0 -z-10 animate-gradient bg-gradient-to-r from-purple-500 via-blue-500 to-pink-500 bg-[length:400%_400%]" />
+    <section className="relative flex flex-col items-center justify-center text-center min-h-screen overflow-hidden text-white">
+      {/* Background Video */}
+      <video
+        className="absolute inset-0 w-full h-full object-cover"
+        src={vid}
+        autoPlay
+        muted
+        loop
+        playsInline
+        preload="auto"
+        disableRemotePlayback
+        onCanPlay={(e) => e.currentTarget.play().catch(() => {})}
+        onContextMenu={(e) => e.preventDefault()}
+      />
 
-      {/* 🦄 Hero Section */}
-      <section className="flex flex-col items-center justify-center text-center px-6 mt-32 space-y-6 max-w-4xl">
-        <h1 className="text-5xl md:text-6xl font-extrabold text-white drop-shadow-lg">
+      <div className="absolute inset-0 bg-black/60"></div>
+
+      {/* Main Content */}
+      <div className="relative z-10 flex flex-col items-center justify-center mt-20 px-4 sm:px-6 md:px-8 space-y-6 max-w-5xl mx-auto">
+        <h2 className="font-extrabold text-3xl sm:text-4xl md:text-5xl leading-tight drop-shadow-lg">
           From Idea to Presentation in One Click ⚡
-        </h1>
-        <p className="text-xl text-gray-200 leading-relaxed max-w-2xl">
+        </h2>
+
+        <p className="text-base sm:text-lg md:text-xl text-gray-200 leading-relaxed drop-shadow-md max-w-2xl">
           Generate sleek, editable PPT decks in minutes. AI handles slide
-          design, formatting, and visuals — so you can focus on your message,
-          impress your audience, and work smarter, not harder.
+          design, formatting, and visual content so you can focus on your
+          message, impress your audience, and work smarter — not harder.
         </p>
 
-        <div className="flex gap-4 mt-4">
-          <Button className="cursor-pointer bg-white text-black hover:bg-gray-100 font-semibold shadow-md flex items-center gap-2">
-            <Play className="w-4 h-4 text-black" /> Watch Demo
+        <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto justify-center">
+          <Button className="cursor-pointer flex items-center justify-center gap-2 text-sm sm:text-base bg-white text-black hover:bg-gray-100 font-semibold shadow-md">
+            <Play className="w-4 h-4 sm:w-5 sm:h-5 text-black" />
+            Watch Demo
           </Button>
-          <Button className="cursor-pointer bg-primary text-primary-foreground font-semibold hover:bg-primary/90 shadow-md">
-            Get Started
-          </Button>
+
+          {user ? (
+            <Button
+              onClick={() => navigate("/workspace")}
+              className="cursor-pointer text-sm sm:text-base bg-white text-black hover:bg-gray-100 font-semibold shadow-md"
+            >
+              Go to Workspace
+            </Button>
+          ) : (
+            <SignInButton mode="modal">
+              <Button className="cursor-pointer text-sm sm:text-base bg-white text-black hover:bg-gray-100 font-semibold shadow-md">
+                Get Started
+              </Button>
+            </SignInButton>
+          )}
         </div>
-      </section>
+      </div>
 
-      {/* 🌙 Footer */}
-      <footer className="w-full py-6 mt-16 text-center text-gray-200 text-sm border-t border-white/10">
-        <p>
+      {/* Footer */}
+      <footer className="relative z-10 w-full mt-25 bg-black/40 backdrop-blur-md border-t border-white/10 text-center">
+        <p className="text-gray-300 text-sm mt-10">
           © {new Date().getFullYear()}{" "}
-          <span className="font-semibold">AIPresentify</span>. All rights
-          reserved.
+          <span className="font-semibold text-white">AIPresentify</span>. All
+          rights reserved.
         </p>
-        <div className="flex justify-center gap-6 mt-2 text-gray-300">
+
+        <div className="flex justify-center gap-6 mt-3 text-gray-400 text-sm">
           <a href="#" className="hover:text-white transition">
             Privacy Policy
           </a>
@@ -48,8 +82,8 @@ const GetStarted = () => {
           </a>
         </div>
       </footer>
-    </div>
+    </section>
   );
 };
 
-export default GetStarted;
+export default Hero;
