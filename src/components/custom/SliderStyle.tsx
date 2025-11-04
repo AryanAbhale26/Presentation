@@ -1,8 +1,25 @@
 import React, { useState } from "react";
 import { DesignStyles } from "./Assets";
 
-const SliderStyle = () => {
-  const [selectedStyle, setSelectedStyle] = useState("");
+export type DesignStyleType = {
+  styleName: string;
+  colors: any;
+  designGuide: string;
+  icon: string;
+  bannerImage: string;
+};
+
+type Props = {
+  selectStyle: any;
+};
+
+const SliderStyle = ({ selectStyle }: Props) => {
+  const [selectedStyle, setSelectedStyle] = useState<string>("");
+
+  const handleSelect = (style: DesignStyleType) => {
+    setSelectedStyle(style.styleName);
+    selectStyle(style);
+  };
 
   return (
     <div className="mb-8 w-full max-w-6xl mx-auto px-4">
@@ -12,17 +29,17 @@ const SliderStyle = () => {
 
       <div
         className="
-          grid 
-          grid-cols-1           
-          sm:grid-cols-2          
-          lg:grid-cols-3          
-          gap-6                   
+          grid
+          grid-cols-1
+          sm:grid-cols-2
+          lg:grid-cols-3
+          gap-6
         "
       >
         {DesignStyles.map((style, index) => (
           <button
             key={index}
-            onClick={() => setSelectedStyle(style.styleName)}
+            onClick={() => handleSelect(style)}
             className={`relative w-full aspect-[16/9] rounded-2xl border-2 transition-all overflow-hidden shadow-lg ${
               selectedStyle === style.styleName
                 ? "border-white scale-[1.02]"
@@ -40,7 +57,7 @@ const SliderStyle = () => {
             </div>
 
             {selectedStyle === style.styleName && (
-              <div className="absolute inset-0 bg-white/10 scale-200 " />
+              <div className="absolute inset-0 bg-white/10 scale-200" />
             )}
           </button>
         ))}
