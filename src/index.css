@@ -184,3 +184,38 @@
     --ring: 224.3 76.3% 48%;
   }
 }
+
+.scrollbar-hide::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+.scrollbar-hide::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollbar-hide::-webkit-scrollbar-thumb {
+  background: #3f3f46;
+  border-radius: 2px;
+}
+
+.scrollbar-hide::-webkit-scrollbar-thumb:hover {
+  background: #52525b;
+}
+
+/* Firefox */
+.scrollbar-hide {
+  scrollbar-width: thin;
+  scrollbar-color: #3f3f46 transparent;
+}
+/* Hide scrollbar for Chrome, Safari, Edge */
+*::-webkit-scrollbar {
+  width: 0px;
+  height: 0px;
+}
+
+/* Hide scrollbar for Firefox */
+* {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}

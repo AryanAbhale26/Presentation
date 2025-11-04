@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { firebaseDb, GeminiAiModel } from "../../../config/FirebaseConfig";
-import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
+import { doc, getDoc, setDoc } from "firebase/firestore";
 import SliderStyle, {
   type DesignStyleType,
 } from "../../../components/custom/SliderStyle";
@@ -9,12 +9,14 @@ import OutlineSection from "../../../components/custom/OutlineSection";
 import { Button } from "../../../components/ui/button";
 import { Sparkle } from "lucide-react";
 
-type Project = {
+export type Project = {
   userInputPrompt: string;
   projectId: string;
   createdAt: number;
   noOfSlider?: number;
   outline?: outLine[];
+  slides: any[];
+  designStyle: DesignStyle;
 };
 
 export type outLine = {
@@ -23,7 +25,14 @@ export type outLine = {
   outline: string;
 };
 
+export type DesignStyle = {
+  colors: any;
+  designGuide: string;
+  styleName: string;
+};
+
 const Outline = () => {
+  const navigate = useNavigate();
   const [projectDetails, setProjectDetails] = useState<Project | null>(null);
   const [loading, setLoading] = useState(false);
   const [updateDbLoading, setUpdateDbLoading] = useState(false);
@@ -40,6 +49,11 @@ const Outline = () => {
     if (docSnap.exists()) {
       const data = docSnap.data() as Project;
       setProjectDetails(data);
+
+      // ✅ load outline if exists
+      if (data.outline && Array.isArray(data.outline)) {
+        setOutline(data.outline);
+      }
     }
   };
 
@@ -71,15 +85,12 @@ Return ONLY the response in pure JSON format using this schema:
 ]
 `;
 
-    console.log("Prompt being sent:\n", Outline_prompt);
-
     try {
       const result = await GeminiAiModel.generateContent(Outline_prompt);
       const text = result.response.text();
       const rawJson = text.replace("```json", "").replace("```", "");
       const JSONData = JSON.parse(rawJson);
       setOutline(JSONData);
-      console.log("AI response:", JSONData);
     } catch (error) {
       console.error("Error generating outline:", error);
     } finally {
@@ -87,7 +98,7 @@ Return ONLY the response in pure JSON format using this schema:
     }
   };
 
-  // Handle outline update - just update local JSON state
+  // Local outline update
   const handleOutlineUpdate = (index: number, updatedOutline: outLine) => {
     if (!outline) return;
 
@@ -112,8 +123,9 @@ Return ONLY the response in pure JSON format using this schema:
       await setDoc(
         doc(firebaseDb, "project", projectId),
         {
-          designStyle: selectedStyle ?? null, // ensure not undefined
-          outline: outline ?? null, // ensure not undefined
+          designStyle: selectedStyle ?? null,
+          outline: outline ?? [], // ✅ ensure array
+          slides: [], // ✅ initialize slides array
         },
         { merge: true }
       );
@@ -126,7 +138,11 @@ Return ONLY the response in pure JSON format using this schema:
   };
 
   useEffect(() => {
-    if (projectDetails && !projectDetails.outline) {
+    if (!projectDetails) return;
+
+    if (projectDetails.outline && projectDetails.outline.length > 0) {
+      setOutline(projectDetails.outline);
+    } else {
       GenerateSlidersOutline();
     }
   }, [projectDetails]);
@@ -146,13 +162,15 @@ Return ONLY the response in pure JSON format using this schema:
           onUpdate={handleOutlineUpdate}
         />
       </div>
-      <div className="flex  justify-center flex-row mt-4">
+      <div className="flex justify-center flex-row mt-4">
         <Button
-          onClick={() => generateSlides()}
-          className="px-3 py-3 bg-green-500 hover:bg-green-800  "
-          size={"lg"}
+          onClick={async () => {
+            await generateSlides();
+            navigate(`/workspace/project/${projectId}/editor`);
+          }}
+          className="px-3 py-3 bg-green-500 hover:bg-green-800"
+          size="lg"
         >
-          {" "}
           Generate Slides <Sparkle />
         </Button>
       </div>
