@@ -38,11 +38,19 @@ const Hero = () => {
         </p>
 
         <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto justify-center">
-          <Button className="cursor-pointer flex items-center justify-center gap-2 text-sm sm:text-base bg-white text-black hover:bg-gray-100 font-semibold shadow-md">
-            <Play className="w-4 h-4 sm:w-5 sm:h-5 text-black" />
-            Watch Demo
-          </Button>
+          {/* Watch Demo Button */}
+          <a
+            href="https://drive.google.com/file/d/1T4GgPth2w3eYvGR9zJHFvbX8BBWiYlwx/view?usp=drive_link"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <Button className="cursor-pointer flex items-center justify-center gap-2 text-sm sm:text-base bg-white text-black hover:bg-gray-100 font-semibold shadow-md">
+              <Play className="w-4 h-4 sm:w-5 sm:h-5 text-black" />
+              Watch Demo
+            </Button>
+          </a>
 
+          {/* Auth Buttons */}
           {user ? (
             <Button
               onClick={() => navigate("/workspace")}
