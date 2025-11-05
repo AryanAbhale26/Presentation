@@ -8,6 +8,7 @@ import { ClerkProvider } from "@clerk/clerk-react";
 import { UserDetailContext } from "./config/context/UserDetailContex.tsx";
 import Outline from "./workspace/project/outline/Index.tsx";
 import Editor from "./workspace/project/editor/Index.tsx";
+import Pricing from "./workspace/Pricing/Index.tsx";
 
 const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 
@@ -23,6 +24,7 @@ const router = createBrowserRouter([
     children: [
       { path: "project/:projectId/outline", element: <Outline /> },
       { path: "project/:projectId/editor", element: <Editor /> },
+      { path: "pricing", element: <Pricing /> },
     ],
   },
 ]);

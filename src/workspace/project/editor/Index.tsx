@@ -1,5 +1,9 @@
+// Editor/Index.tsx
 import React, { useEffect, useRef, useState } from "react";
 import Outline, { type Project } from "../outline/Index";
+import PptxGenJS from "pptxgenjs";
+import html2canvas from "html2canvas";
+
 import OutlineSection from "../../../components/custom/OutlineSection";
 import {
   firebaseDb,
@@ -10,8 +14,11 @@ import { doc, getDoc, setDoc } from "firebase/firestore";
 import { useParams } from "react-router-dom";
 import { image_pr } from "../../../assets/prompt";
 import SliderFrame from "../../../components/custom/SliderFrame";
+import { Button } from "@/components/ui/button";
+import { FileDown, Loader2 } from "lucide-react";
 
 const Editor = () => {
+  const pptx = new PptxGenJS();
   const { projectId } = useParams();
   const [projectDetail, setProjectDetail] = useState<Project>();
   const [loading, setLoading] = useState(false);
@@ -19,6 +26,7 @@ const Editor = () => {
   const [isSlidesGenerated, setIsSlidesGenerated] = useState<any>();
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [downloadLoading, setDownloadLoading] = useState(false);
+
   useEffect(() => {
     projectId && GetProjectDetail();
   }, [projectId]);
@@ -46,16 +54,9 @@ const Editor = () => {
   const GenerateSlides = async () => {
     if (!projectDetail?.outline || projectDetail.outline.length === 0) return;
 
-    console.log("🚀 Starting slide generation...");
+    console.log("Starting slide generation...");
 
-    // Optional: initialize sliders to empty states
-    // setSliders(projectDetail.outline.map(() => ({ code: "" })));
-
-    for (
-      let index = 0;
-      index < projectDetail.outline.length && index < 5;
-      index++
-    ) {
+    for (let index = 0; index <= projectDetail.outline.length; index++) {
       const metaData = projectDetail.outline[index];
       const prompt = image_pr
         .replace(
@@ -68,15 +69,15 @@ const Editor = () => {
         )
         .replace("{METADATA}", JSON.stringify(metaData));
 
-      console.log(" Generating slide", index + 1);
-      await GeminiSlideCall(prompt, index); // wait for one slide to finish before next
-      console.log("Finished slide", index + 1);
+      console.log("📝 Generating slide", index + 1);
+      await GeminiSlideCall(prompt, index);
+      console.log("✅ Finished slide", index + 1);
     }
 
-    console.log("All slides generated!");
-
+    console.log("🎉 All slides generated!");
     setIsSlidesGenerated(Date.now());
   };
+
   const GeminiSlideCall = async (prompt: string, index: number) => {
     try {
       const session = await GeminiAiLiveModel.connect();
@@ -84,7 +85,6 @@ const Editor = () => {
 
       let text = "";
 
-      // Read stream
       for await (const message of session.receive()) {
         if (message.type === "serverContent") {
           const parts = message.modelTurn?.parts;
@@ -96,7 +96,6 @@ const Editor = () => {
               .replace(/```/g, "")
               .trim();
 
-            // Live update the slider
             setSliders((prev: any[]) => {
               const updated = prev ? [...prev] : [];
               updated[index] = { code: finalText };
@@ -106,14 +105,14 @@ const Editor = () => {
 
           if (message.turnComplete) {
             console.log(" Slide", index + 1, "complete");
-            break; // important: exit loop when done
+            break;
           }
         }
       }
 
       session.close();
     } catch (err) {
-      console.error(" Error generating slide", index + 1, err);
+      console.error("❌ Error generating slide", index + 1, err);
     }
   };
 
@@ -131,9 +130,10 @@ const Editor = () => {
         merge: true,
       }
     );
+    console.log("Slides saved to database");
   };
 
-  const updateSliderCode = (updateSlideCode: string, index: number) => {
+  const updateSliderCode = async (updateSlideCode: string, index: number) => {
     setSliders((prev: any) => {
       const updated = [...prev];
       updated[index] = {
@@ -142,13 +142,42 @@ const Editor = () => {
       };
       return updated;
     });
-    setIsSlidesGenerated(Date.now());
+
+    // Save updated slide to database immediately
+    const updatedSlides = [...sliders];
+    updatedSlides[index] = {
+      ...updatedSlides[index],
+      code: updateSlideCode,
+    };
+
+    await setDoc(
+      doc(firebaseDb, "project", projectId ?? ""),
+      {
+        slides: updatedSlides,
+      },
+      {
+        merge: true,
+      }
+    );
+    console.log("💾 Updated slide", index + 1, "saved to database");
   };
 
   const exportAllIframesToPPT = async () => {
     if (!containerRef.current) return;
     setDownloadLoading(true);
-    // const pptx = new PptxGenJS();
+
+    // Save all current slides to database before export
+    await setDoc(
+      doc(firebaseDb, "project", projectId ?? ""),
+      {
+        slides: sliders,
+      },
+      {
+        merge: true,
+      }
+    );
+
+    const pptx = new PptxGenJS();
     const iframes = containerRef.current.querySelectorAll("iframe");
 
     for (let i = 0; i < iframes.length; i++) {
@@ -157,25 +186,40 @@ const Editor = () => {
         iframe.contentDocument || iframe.contentWindow?.document;
       if (!iframeDoc) continue;
 
-      // Grab the main slide element inside the iframe (usually <body> or inner div)
       const slideNode = iframeDoc.querySelector("body > div") || iframeDoc.body;
       if (!slideNode) continue;
 
-      console.log(`Exporting slide ${i + 1}...`);
-      //@ts-ignore
-      const dataUrl = await htmlToImage.toPng(slideNode, { quality: 1 });
+      console.log(`📸 Exporting slide ${i + 1}...`);
 
-      // const slide = pptx.addSlide();
-      // slide.addImage({
-      //   data: dataUrl,
-      //   x: 0,
-      //   y: 0,
-      //   w: 10,
-      //   h: 5.625,
-      // });
+      try {
+        const canvas = await html2canvas(slideNode as HTMLElement, {
+          allowTaint: true,
+          useCORS: true,
+          scale: 2,
+          backgroundColor: null,
+          logging: false,
+        });
+
+        const dataUrl = canvas.toDataURL("image/png");
+
+        const slide = pptx.addSlide();
+        slide.addImage({
+          data: dataUrl,
+          x: 0,
+          y: 0,
+          w: 10,
+          h: 5.625,
+        });
+      } catch (error) {
+        console.error(`❌ Error exporting slide ${i + 1}:`, error);
+      }
     }
+
     setDownloadLoading(false);
-    // pptx.writeFile({ fileName: "MyProjectSlides.pptx" });
+    pptx.writeFile({
+      fileName: `${projectDetail?.projectId || "MyProject"}.pptx`,
+    });
+    console.log("PPT downloaded successfully");
   };
 
   return (
@@ -186,15 +230,30 @@ const Editor = () => {
           loading={loading}
         />
       </div>
-      <div className="col-span-3  h-screen overflow-auto scrollbar-hide">
+      <div
+        ref={containerRef}
+        className="col-span-3 h-screen overflow-auto scrollbar-hide"
+      >
         {(sliders ?? []).map((slide: any, index: number) => (
           <SliderFrame
             slide={slide}
             key={index}
+            slideIndex={index}
             colors={projectDetail?.designStyle?.colors}
+            updateSlider={(html) => updateSliderCode(html, index)}
           />
         ))}
       </div>
+      {/* Export button */}
+      <Button
+        onClick={exportAllIframesToPPT}
+        size={"lg"}
+        className=" bg-red-500 fixed bottom-6 transform left-1/2 -translate-x-1/2 cursor-pointer hover:bg-red-700"
+        disabled={downloadLoading}
+      >
+        {downloadLoading ? <Loader2 className="animate-spin" /> : <FileDown />}{" "}
+        Export PPT
+      </Button>
     </div>
   );
 };

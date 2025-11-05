@@ -219,3 +219,19 @@
   scrollbar-width: none;
   -ms-overflow-style: none;
 }
+/* Force pricing cards inside Clerk table to align side-by-side */
+.clerk-pricing-wrapper .cl-pricing-table-plans {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)) !important;
+  gap: 24px !important;
+  justify-items: center;
+}
+
+/* Plan card styling override */
+.clerk-pricing-wrapper ::part(plan-card) {
+  width: 100% !important;
+  max-width: 380px !important;
+  min-height: 330px !important;
+  display: flex !important;
+  flex-direction: column !important;
+}

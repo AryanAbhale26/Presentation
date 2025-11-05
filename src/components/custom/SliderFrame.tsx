@@ -1,213 +1,189 @@
 import { useParams } from "react-router-dom";
 import { HTMLTEM } from "../../assets/prompt";
 import React, { useEffect, useRef, useState } from "react";
-import { firebaseDb, GeminiAiModel } from "@/config/FirebaseConfig";
-import { doc, setDoc } from "firebase/firestore";
+import { GeminiAiModel } from "@/config/FirebaseConfig";
+import FloatingActionTool from "./FloatingActionTool";
+import { Button } from "../ui/button";
+import { Save } from "lucide-react";
+
 const HTML_DEFAULT = HTMLTEM;
+
 type props = {
   slide: { code: string };
   colors: any;
+  updateSlider: (html: string) => void;
+  slideIndex: number;
 };
 
-const SliderFrame = ({ slide, colors }: props) => {
-  const { projectId } = useParams();
-  const setUpdateSlider = (updatedHtml: string) => {
-    if (slide && typeof slide === "object") {
-      slide.code = updatedHtml;
-    }
-  };
+const SliderFrame = ({ slide, colors, updateSlider, slideIndex }: props) => {
+  const iframeRef = useRef<HTMLIFrameElement | null>(null);
+  const selectedElRef = useRef<HTMLElement | null>(null);
+
+  const [loading, setLoading] = useState(false);
+  const [hasChanges, setHasChanges] = useState(false);
+  const [cardPosition, setCardPosition] = useState<{
+    x: number;
+    y: number;
+  } | null>(null);
 
   const FINAL_CODE = HTML_DEFAULT.replace(
     "{colorCodes}",
     JSON.stringify(colors)
   ).replace("{code}", slide?.code);
 
-  const iframeRef = useRef<any>(null);
-  const [loading, setLoading] = useState(false);
-  const selectedElRef = useRef<HTMLElement | null>(null);
-  const [cardPosition, setCardPosition] = useState<{
-    x: number;
-    y: number;
-  } | null>(null);
-  useEffect(() => {
-    if (!iframeRef.current) return;
+  /** ✅ Save current iframe content to database */
+  const saveCurrentContent = () => {
     const iframe = iframeRef.current;
-    const doc = iframeRef.current.contentDocument;
+    if (!iframe?.contentDocument?.body) return;
+
+    const updatedHTML = iframe.contentDocument.body.innerHTML;
+    updateSlider(updatedHTML);
+    setHasChanges(false);
+    console.log(`💾 Slide ${slideIndex + 1} saved manually`);
+  };
+
+  /** ✅ Load slide + inline editing */
+  useEffect(() => {
+    const iframe = iframeRef.current;
+    if (!iframe) return;
+    const doc = iframe.contentDocument;
     if (!doc) return;
 
-    // Write the HTML inside the iframe
     doc.open();
     doc.write(FINAL_CODE);
     doc.close();
 
-    // Allow iframe to capture keyboard events
-    //doc.body.setAttribute("tabindex", "0");
+    const init = () => {
+      const body = doc.body;
+      if (!body) return;
 
-    let hoverEl: HTMLElement | null = null;
-    let selectedEl: HTMLElement | null = null;
+      body.style.userSelect = "text";
 
-    const handleMouseOver = (e: MouseEvent) => {
-      if (selectedEl) return;
-      const target = e.target as HTMLElement;
-      if (hoverEl && hoverEl !== target) hoverEl.style.outline = "";
-      hoverEl = target;
-      hoverEl.style.outline = "2px dotted blue";
+      let selectedEl: HTMLElement | null = null;
+
+      const handleClick = (e: MouseEvent) => {
+        e.stopPropagation();
+        const t = e.target as HTMLElement;
+
+        if (selectedEl && selectedEl !== t) {
+          selectedEl.style.outline = "";
+          selectedEl.removeAttribute("contenteditable");
+        }
+
+        selectedEl = t;
+        selectedElRef.current = t;
+
+        t.style.outline = "2px solid #00FF9C";
+        t.setAttribute("contenteditable", "true");
+        t.focus();
+
+        const r = t.getBoundingClientRect();
+        const ir = iframe.getBoundingClientRect();
+
+        setCardPosition({
+          x: ir.left + r.left + r.width / 2,
+          y: ir.top + r.bottom + 8,
+        });
+      };
+
+      const handleInput = () => {
+        setHasChanges(true);
+      };
+
+      const handleKeyDown = (e: KeyboardEvent) => {
+        if (e.key === "Escape" && selectedEl) {
+          selectedEl.style.outline = "";
+          selectedEl.removeAttribute("contenteditable");
+          selectedEl = null;
+          setCardPosition(null);
+        }
+      };
+
+      body.addEventListener("click", handleClick);
+      body.addEventListener("input", handleInput);
+      body.addEventListener("keydown", handleKeyDown);
+
+      return () => {
+        body.removeEventListener("click", handleClick);
+        body.removeEventListener("input", handleInput);
+        body.removeEventListener("keydown", handleKeyDown);
+      };
     };
 
-    const handleMouseOut = () => {
-      if (selectedEl) return;
-      if (hoverEl) {
-        hoverEl.style.outline = "";
-        hoverEl = null;
-      }
-    };
-
-    const handleClick = (e: MouseEvent) => {
-      e.stopPropagation();
-      const target = e.target as HTMLElement;
-
-      if (selectedEl && selectedEl !== target) {
-        selectedEl.style.outline = "";
-        selectedEl.removeAttribute("contenteditable");
-      }
-
-      selectedEl = target;
-
-      selectedElRef.current = target;
-
-      if (selectedEl && selectedEl !== target) {
-        selectedEl.style.outline = "";
-        selectedEl.removeAttribute("contenteditable");
-      }
-
-      selectedEl = target;
-      selectedEl.style.outline = "2px solid blue";
-      selectedEl.setAttribute("contenteditable", "true");
-      selectedEl.focus();
-
-      console.log("Selected element:", selectedEl);
-
-      const rect = target.getBoundingClientRect();
-      const iframeRect = iframe.getBoundingClientRect();
-
-      setCardPosition({
-        x: iframeRect.left + rect.left + rect.width / 2,
-        y: iframeRect.top + rect.bottom,
-      });
-    };
-
-    const handleBlur = () => {
-      if (selectedEl) {
-        console.log("Final edited element:", selectedEl.outerHTML);
-        const updatedSliderCode = iframe.contentDocument?.body?.innerHTML;
-        console.log(updatedSliderCode);
-        setUpdateSlider(updatedSliderCode);
-      }
-    };
-
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && selectedEl) {
-        selectedEl.style.outline = "";
-        selectedEl.removeAttribute("contenteditable");
-        selectedEl.removeEventListener("blur", handleBlur);
-        selectedEl = null;
-      }
-    };
-
-    // ✅ Wait for DOM content to be ready
-    doc.addEventListener("DOMContentLoaded", () => {
-      doc.body?.addEventListener("mouseover", handleMouseOver);
-      doc.body?.addEventListener("mouseout", handleMouseOut);
-      doc.body?.addEventListener("click", handleClick);
-      doc.body?.addEventListener("keydown", handleKeyDown);
-    });
-
-    // ✅ Cleanup listeners on unmount
-    return () => {
-      doc.body?.removeEventListener("mouseover", handleMouseOver);
-      doc.body?.removeEventListener("mouseout", handleMouseOut);
-      doc.body?.removeEventListener("click", handleClick);
-      doc.body?.removeEventListener("keydown", handleKeyDown);
-    };
+    iframe.onload = () => init();
+    setTimeout(init, 30);
   }, [slide?.code]);
 
-  const handleAiSectionChange = async (userAiPrompt: string) => {
+  /** ✅ AI Edit */
+  const handleAiSectionChange = async (userPrompt: string) => {
     setLoading(true);
-    const selectedEl = selectedElRef.current;
+
     const iframe = iframeRef.current;
+    const selected = selectedElRef.current;
+    if (!selected || !iframe) return;
 
-    if (!selectedEl || !iframe) return;
-
-    // Get the current HTML of the selected element
-    const oldHTML = selectedEl.outerHTML;
-
-    // Build AI prompt
+    const old = selected.outerHTML;
 
     const prompt = `
-  Regenerate or rewrite the following HTML code based on this user instruction.
-  If user asked to change the image/regenerate the image then make sure to use
-  ImageKit:
-'https://ik.imagekit.io/ikmedia/ik-genimg-prompt-{imagePrompt}/{altImageName}.jpg'
-Replace {imagePrompt} with relevant image prompt and altImageName with a random image name.
-if user want to crop image, or remove background or scale image or optimze image then add image kit ai transfromation 
-by providing ?tr=fo-auto,<other transfromation> etc.  
-  "User Instruction is :${userAiPrompt}"
-  HTML code:
-  ${oldHTML}
-  `;
+Regenerate HTML based on user instruction. 
+User: ${userPrompt}
+HTML: ${old}
+    `;
 
     try {
-      const result = await GeminiAiModel.generateContent(prompt);
-      const newHTML = (await result.response.text()).trim();
+      const res = await GeminiAiModel.generateContent(prompt);
+      const newHTML = (await res.response.text()).trim();
 
-      const tempDiv = iframe.contentDocument?.createElement("div");
-      if (tempDiv) {
-        tempDiv.innerHTML = newHTML;
-        const newNode = tempDiv.firstElementChild;
+      const doc = iframe.contentDocument;
+      const temp = doc?.createElement("div");
+      if (!temp) return;
 
-        if (newNode && selectedEl.parentNode) {
-          selectedEl.parentNode.replaceChild(newNode, selectedEl);
-          selectedElRef.current = newNode as HTMLElement;
-          console.log("✅ Element replaced successfully");
+      temp.innerHTML = newHTML;
+      const newNode = temp.firstElementChild;
 
-          const updatedSliderCode =
-            iframe.contentDocument?.body?.innerHTML || newHTML;
-          console.log(updatedSliderCode);
-          setUpdateSlider(updatedSliderCode);
-        }
+      if (newNode && selected.parentNode) {
+        selected.parentNode.replaceChild(newNode, selected);
+        selectedElRef.current = newNode as HTMLElement;
+
+        setHasChanges(true);
       }
-    } catch (err) {
-      console.error("AI generation failed:", err);
+    } catch (e) {
+      console.error(e);
     }
 
     setLoading(false);
   };
 
-  // ✅ Save slides to Firebase
-  const SaveAllSlides = async (updatedSlides: any[]) => {
-    if (!projectId) return;
-    await setDoc(
-      doc(firebaseDb, "projects", projectId),
-      { slides: updatedSlides },
-      { merge: true }
-    );
-    console.log("✅ Slides updated to Firestore");
-  };
-
   return (
-    <div className="mb-5 w-full flex justify-center overflow-x-auto">
-      <iframe
-        ref={iframeRef}
-        className="w-full max-w-[800px] h-[250px] sm:h-[500px] border-0 rounded-2xl"
-        sandbox="allow-scripts allow-same-origin allow-modals allow-forms allow-popups"
-      />
+    <div className="mb-5 w-full flex justify-center overflow-auto relative">
+      <div className="relative w-full max-w-[800px]">
+        <iframe
+          ref={iframeRef}
+          className="w-full h-[250px] sm:h-[500px] rounded-2xl border-0"
+          sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
+        />
 
-      {/* <FloatingActionTool
-        position={cardPosition}
-        onClose={() => setCardPosition(null)}
-        loading={loading}
-        handleAiChange={(value: string) => handleAiSectionChange(value)}
-      /> */}
+        {/* Save button - shows when there are unsaved changes */}
+        {hasChanges && (
+          <Button
+            onClick={saveCurrentContent}
+            size="sm"
+            className="absolute top-2 right-2 bg-green-600 hover:bg-green-700 z-10"
+          >
+            <Save size={16} className="mr-1" />
+            Save Changes
+          </Button>
+        )}
+      </div>
+
+      {cardPosition && (
+        <FloatingActionTool
+          position={cardPosition}
+          loading={loading}
+          onClose={() => setCardPosition(null)}
+          handleAiChange={handleAiSectionChange}
+        />
+      )}
     </div>
   );
 };
