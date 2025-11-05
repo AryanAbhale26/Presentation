@@ -9,13 +9,13 @@ Sparta is a full-stack SaaS application that leverages artificial intelligence t
 
 ## 🔗 Live Demo
 
-[**Try Sparta Now →**](https://presentation-aryanabhale26s-projects.vercel.app/)
+https://presentation-aryanabhale26s-projects.vercel.app/
 
 ---
 
 ## 🎥 Demo Video
 
-[![Sparta Demo](https://github.com/user-attachments/assets/06287faf-904c-480b-b179-fc6d51a743d4)
+https://github.com/user-attachments/assets/06287faf-904c-480b-b179-fc6d51a743d4
 
 ---
 
