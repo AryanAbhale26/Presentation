@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import { useContext } from "react";
 import logo from "../../assets/ai.png";
 import { Button } from "../ui/button";
 import { SignInButton, useUser, UserButton, useAuth } from "@clerk/clerk-react";

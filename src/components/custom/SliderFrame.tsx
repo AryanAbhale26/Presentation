@@ -1,6 +1,5 @@
-import { useParams } from "react-router-dom";
 import { HTMLTEM } from "../../assets/prompt";
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { GeminiAiModel } from "@/config/FirebaseConfig";
 import FloatingActionTool from "./FloatingActionTool";
 import { Button } from "../ui/button";

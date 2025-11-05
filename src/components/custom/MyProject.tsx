@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Folder } from "lucide-react";
-import type { Project } from "../../workspace/project/outline/Index";
+import type { Project } from "../../workspace/project/outline/temp";
 import { collection, getDocs, query, where } from "firebase/firestore";
 import { firebaseDb } from "../../config/FirebaseConfig";
 import { useUser } from "@clerk/clerk-react";

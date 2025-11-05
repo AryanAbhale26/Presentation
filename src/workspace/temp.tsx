@@ -4,12 +4,12 @@ import { UserDetailContext } from "../config/context/UserDetailContex";
 import { firebaseDb } from "../config/FirebaseConfig";
 import { useUser, SignInButton } from "@clerk/clerk-react";
 import { doc, getDoc, setDoc } from "firebase/firestore";
-import React, { useContext, useEffect } from "react";
+import { useContext, useEffect } from "react";
 import { Outlet, useLocation } from "react-router-dom";
 
 const Workspace = () => {
   const { user } = useUser();
-  const { userDetails, setUserDetails } = useContext(UserDetailContext);
+  const { setUserDetails } = useContext(UserDetailContext);
   const location = useLocation();
 
   useEffect(() => {

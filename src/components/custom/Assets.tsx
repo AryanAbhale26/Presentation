@@ -1,12 +1,9 @@
-import React from "react";
 import professionalBanner from "../../assets/professional.jpg";
 import modernGradientBanner from "../../assets/modern-gradient.jpg";
 import pastelBanner from "../../assets/pastel-ppt.jpg";
 import techBanner from "../../assets/tech.jpg";
 import darkBanner from "../../assets/dark.jpg";
 import minimalBanner from "../../assets/Minimalist-White.jpg";
-import aiBanner from "../../assets/ai.png";
-import pptBanner from "../../assets/ppt.png";
 
 export const DesignStyles = [
   {

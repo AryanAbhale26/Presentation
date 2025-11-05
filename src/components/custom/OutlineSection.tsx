@@ -1,8 +1,7 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Skeleton } from "../ui/skeleton";
-import { Edit, Sparkle, X } from "lucide-react";
-import type { outLine } from "../../workspace/project/outline/Index.tsx";
-import { Button } from "../ui/button";
+import { Edit, X } from "lucide-react";
+import type { outLine } from "../../workspace/project/outline/temp";
 
 type Props = {
   loading: boolean;

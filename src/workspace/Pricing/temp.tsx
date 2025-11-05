@@ -1,5 +1,5 @@
 import { PricingTable, useAuth, useUser } from "@clerk/clerk-react";
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import { doc, setDoc, getDoc } from "firebase/firestore";
 import { firebaseDb } from "../../config/FirebaseConfig";
 import { toast } from "sonner";

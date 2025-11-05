@@ -1,15 +1,11 @@
 // Editor/Index.tsx
-import React, { useEffect, useRef, useState } from "react";
-import Outline, { type Project } from "../outline/Index";
+import { useEffect, useRef, useState } from "react";
+import { type Project } from "../outline/temp";
 import PptxGenJS from "pptxgenjs";
 import html2canvas from "html2canvas";
 
 import OutlineSection from "../../../components/custom/OutlineSection";
-import {
-  firebaseDb,
-  GeminiAiLiveModel,
-  GeminiAiModel,
-} from "../../../config/FirebaseConfig";
+import { firebaseDb, GeminiAiLiveModel } from "../../../config/FirebaseConfig";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { useParams } from "react-router-dom";
 import { image_pr } from "../../../assets/prompt";
@@ -18,7 +14,6 @@ import { Button } from "@/components/ui/button";
 import { FileDown, Loader2 } from "lucide-react";
 
 const Editor = () => {
-  const pptx = new PptxGenJS();
   const { projectId } = useParams();
   const [projectDetail, setProjectDetail] = useState<Project>();
   const [loading, setLoading] = useState(false);

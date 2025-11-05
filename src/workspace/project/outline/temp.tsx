@@ -1,5 +1,4 @@
-import React, { useState, useEffect, useContext } from "react";
-import { toast } from "sonner";
+import { useState, useEffect, useContext } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { firebaseDb, GeminiAiModel } from "../../../config/FirebaseConfig";
 import { doc, getDoc, setDoc } from "firebase/firestore";
@@ -39,7 +38,7 @@ const Outline = () => {
   const { userDetails, setUserDetails } = useContext(UserDetailContext);
   const [projectDetails, setProjectDetails] = useState<Project | null>(null);
   const [loading, setLoading] = useState(false);
-  const [updateDbLoading, setUpdateDbLoading] = useState(false);
+  const [_updateDbLoading, setUpdateDbLoading] = useState(false);
   const { projectId } = useParams();
   const [outline, setOutline] = useState<outLine[] | null>(null);
   const [selectedStyle, setSelectedStyle] = useState<DesignStyleType>();
@@ -54,7 +53,6 @@ const Outline = () => {
       const data = docSnap.data() as Project;
       setProjectDetails(data);
 
-      // ✅ Load saved outline if exists
       if (
         data.outline &&
         Array.isArray(data.outline) &&
@@ -180,7 +178,9 @@ Return ONLY JSON:
           Settings and Slider Outline
         </h2>
 
-        <SliderStyle selectStyle={(value) => setSelectedStyle(value)} />
+        <SliderStyle
+          selectStyle={(value: DesignStyleType) => setSelectedStyle(value)}
+        />
 
         <OutlineSection
           loading={loading}

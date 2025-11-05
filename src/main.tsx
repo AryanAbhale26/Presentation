@@ -3,12 +3,12 @@ import { createRoot } from "react-dom/client";
 import "./index.css";
 import App from "./App.tsx";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import Workspace from "./workspace/Index.tsx";
+import Workspace from "./workspace/temp.tsx";
 import { ClerkProvider } from "@clerk/clerk-react";
 import { UserDetailContext } from "./config/context/UserDetailContex.tsx";
-import Outline from "./workspace/project/outline/Index.tsx";
-import Editor from "./workspace/project/editor/Index.tsx";
-import Pricing from "./workspace/Pricing/Index.tsx";
+import Outline from "./workspace/project/outline/temp.tsx";
+import Editor from "./workspace/project/editor/temp.tsx";
+import Pricing from "./workspace/Pricing/temp.tsx";
 
 const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 
